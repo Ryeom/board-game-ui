@@ -1,41 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useWebSocket } from "@/context/WebSocketContext";
 
 export default function WebSocketClient() {
     const socketRef = useRef<WebSocket | null>(null);
     const [log, setLog] = useState<string[]>([]);
     const [roomId, setRoomId] = useState("test-room");
     const [name, setName] = useState("tester");
-    const [isConnected, setIsConnected] = useState(false);
-
-    useEffect(() => {
-        socketRef.current = new WebSocket("ws://localhost:8080/board-game/ws");
-
-        socketRef.current.onopen = () => {
-            setIsConnected(true);
-            addLog("✅ WebSocket connected");
-        };
-
-        socketRef.current.onmessage = (event) => {
-            addLog(`📩 Message: ${event.data}`);
-        };
-
-        socketRef.current.onerror = (err) => {
-            setIsConnected(false);
-            addLog("❌ WebSocket error");
-            console.error(err);
-        };
-
-        socketRef.current.onclose = () => {
-            setIsConnected(false);
-            addLog("🔌 WebSocket disconnected");
-        };
-
-        return () => {
-            socketRef.current?.close();
-        };
-    }, []);
+    const { send, logs, isConnected } = useWebSocket();
 
     const addLog = (message: string) => {
         setLog((prev) => [message, ...prev]);
